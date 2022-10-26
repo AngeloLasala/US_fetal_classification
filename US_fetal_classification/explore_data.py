@@ -84,7 +84,7 @@ def smart_plot(data,image_path):
 	img = imageio.imread(image_path)
 
 	image_name = image_path.split('/')[-1].split('.')[0]
-	image_row = data.loc[data_frame['Image_name'] == image_name]
+	image_row = data.loc[data['Image_name'] == image_name]
 	print(image_row)
 	print(f'pixel = {img.shape}')
 
@@ -97,9 +97,65 @@ def smart_plot(data,image_path):
 	fig, ax = plt.subplots(nrows=1, ncols=1, num = f'Patient {patient_num}: {plane} {brain_plane}')
 	ax.set_title(f'{plane} - {brain_plane}')
 	ax.imshow(img)
-	plt.show()
 
 	return img
+
+def brain_plot(data, n_examples = 5):
+	"""
+	Plot 5 different items of different brain_plane
+
+	Parameters
+	----------
+	data : dataframe
+
+	n_example : integer,	
+		numerb of example for each brain_plane
+	"""
+
+	fig, ax = plt.subplots(nrows=n_examples, ncols=5, figsize=(10,10), num='Simle Images Visualization')
+
+	for i, value in enumerate(data['Brain_plane'].unique()):
+		print(i, value)
+		images = image_paths(data, 'Brain_plane', value)
+		index = np.random.randint(0, len(images), size=(n_examples))
+		
+		ax[0,i].set_title(value)
+		for j, ii in enumerate(index):
+			img = imageio.imread(images[ii])
+			ax[j,i].imshow(img)
+
+def split_data(data):
+	"""
+	Split the dataset in train and test looking at the "Train " attribute
+
+	Parameters
+	----------
+	data : datatframe
+
+	Returns
+	-------
+	train_set : list of array
+		list of training images
+	
+	test_set : list of array
+		list of testing images
+	"""
+	train_paths = image_paths(data, 'Train ', 1)
+	test_paths = image_paths(data, 'Train ', 0)
+
+	train_set = []
+	for path in train_paths:
+		img = imageio.imread(path)
+		train_set.append(img)
+
+	test_set = []
+	for path in test_paths:
+		img = imageio.imread(path)
+		test_set.append(img)
+	
+	return train_set, test_set
+	
+
 
 
 	
@@ -120,11 +176,14 @@ if __name__ == '__main__':
 	
 	index = 50
 	fetal_brain_image = image_paths(data_frame, 'Plane', 'Fetal brain')
-	
+
+
+	brain_plot(data_frame, 6)
 
 	## PLOTS
-	imageio.imread(fetal_brain_image[index])
-	smart_plot(data_frame, fetal_brain_image[index])
+	# imageio.imread(fetal_brain_image[index])
+	# smart_plot(data_frame, fetal_brain_image[index])
+	plt.show()
 
 	
 	
