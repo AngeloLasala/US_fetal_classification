@@ -94,7 +94,7 @@ def smart_plot(data,image_path):
 	brain_plane = image_row['Brain_plane'].unique()[0]
 
 	# create the numpy array and plot it
-	fig, ax = plt.subplots(nrows=1, ncols=1, num = f'Patient {patient_num}: {plane} {brain_plane}')
+	fig, ax = plt.subplots(nrows=1, ncols=1, num = f'Patient {patient_num}: {plane} {brain_plane}__{image_name}')
 	ax.set_title(f'{plane} - {brain_plane}')
 	ax.imshow(img)
 
@@ -154,16 +154,49 @@ def split_data(data):
 		test_set.append(img)
 	
 	return train_set, test_set
+
+def check_anomalies(data, dataset, data_string):
+	"""
+	Check the images with differents distribuction:
+	- 3D shape instead of 2D shape
+	- table instead of US image
+
+	Parameters
+	----------
+	data : data_frame
+
+	dataset: list
+		set train or test set, it comes from 'split_data' fuction
+
+	data_string : string ('train' or 'test')
+		string identification of dataset list 
+
+	Returns
+	-------
+	indeces : list
+		list of position of strange image in train or test dataset
+	"""
+	if data_string == 'train': i_data = 1
+	if data_string == 'test': i_data = 0
+
+
+	indeces = []
+	for i, img in enumerate(dataset):
+		if len(img.shape)>2: 
+			print(i, img.shape)
+			indeces.append(i)
+	print(f'Train: {len(indeces)} 3D-shape imgas')
+
+	for ii in indeces:
+		smart_plot(data, image_paths(data, 'Train ', 0)[ii])
+
+	return indeces
 	
-
-
-
-	
-
 if __name__ == '__main__':
 	images_path = 'FETAL_PLANES_ZENODO/Images'
 	metadata_path = 'FETAL_PLANES_ZENODO/FETAL_PLANES_DB_data.csv'
 
+	## Basic Information
 	data_frame = pd.read_csv(metadata_path, index_col=None)
 	image_list = os.listdir(images_path)
 
@@ -174,20 +207,21 @@ if __name__ == '__main__':
 	plane_dict = data_number_example(data_frame, 'Plane')
 	print()
 	
+	# List of image's path of selected attibutes and value
 	index = 50
 	fetal_brain_image = image_paths(data_frame, 'Plane', 'Fetal brain')
 
-
+	# Simple Image rapreentation
 	brain_plot(data_frame, 6)
 
-	## PLOTS
-	# imageio.imread(fetal_brain_image[index])
-	# smart_plot(data_frame, fetal_brain_image[index])
+	## Check incongruent samples: 3D array and strage image shape
+	print('Start split train and test: takes about 2.0 minutes')
+	train_set, test_set = split_data(data_frame)
+	print('OK! splitting complete \n')
+
+	# Incongruent image on test  
+	stange_img_pos = check_anomalies(data_frame, train_set, 'train')
+	print(f'anomalies: {len(stange_img_pos)}')
+
+	## PLOTS ################################
 	plt.show()
-
-	
-	
-
-
-
-
