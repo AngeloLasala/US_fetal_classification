@@ -4,21 +4,31 @@ Main code for Classification task about Plane and Brain_plane
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import argparse
 import tensorflow as tf
 import tensorflow.keras.layers as tfl
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
 
-from classification_utils import data_augmenter, plane_model
+from classification_utils import *
 
 if __name__ == '__main__':
+	parser = argparse.ArgumentParser(description='Main for classification problem of US fetal image')
+	parser.add_argument("attribute", type=str, help="Attributo to cliification task: 'Plane' or 'Brain_plane'")
+	parser.add_argument("model_name", type=str, help="""Model name: 'MobileNetV2'""")
+	
+	args = parser.parse_args()
 
-	## LOAD TRAIN SET - preprocessing parameters
-	BACH_SIZE = 32
-	IMG_SIZE = (224,224)
-	val_split = 0.1
+	## MODEL STRUCTURE
+	model_name = args.model_name
+	model_par = model_parameter(model_name, epochs=1)
 
-	images_path = 'Images_classification_Plane/train/'
+	## Model dictianory of parameters
+	BACH_SIZE = model_par['BACH_SIZE']
+	IMG_SIZE = model_par['IMG_SIZE']
+	val_split = model_par['val_split']
+
+	images_path = 'Images_classification_'+args.attribute + '/train/'
 
 	train_dataset = image_dataset_from_directory(images_path,
                                              shuffle=True,
@@ -46,15 +56,28 @@ if __name__ == '__main__':
 	data_augmentation = data_augmenter()
 
 	## MODEL
-	model2 = plane_model(IMG_SIZE, data_augmentation)
+	model = classification_model(model_par, data_augmentation)
 
 	## TRAINING
-	learning_rate = 0.01
-	model2.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+	learning_rate = model_par['learning_rate']
+	model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
               	   loss='sparse_categorical_crossentropy',
                    metrics=['accuracy'])
 	
-	
-	initial_epochs = 5
-	history = model2.fit(train_dataset, validation_data=validation_dataset, epochs=initial_epochs)
+	epochs = model_par['epochs']
+	history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
+
+	## SAVE MODEL and PARAMETERS FILE
+	classification_path = 'Images_classification_'+ args.attribute
+	models_path = 'Images_classification_'+ args.attribute + '/models'
+	model.save(models_path + '/' + model_name, save_format='h5')
+
+	with open(models_path + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:
+		file.write(f'\n Model Name: {model_name} \n ')
+		model.summary(print_fn=lambda x: file.write(x + '\n'))
+
+		for par in model_par.keys():
+			file.write(f'\n {par}: {model_par[par]} \n ')
+
+
 	
