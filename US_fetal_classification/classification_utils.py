@@ -60,6 +60,44 @@ def data_augmenter():
     
     return data_augmentation
 
+def model_parameter(model_name,
+                    BACH_SIZE = 32,
+	                IMG_SIZE = (224,224),
+	                val_split = 0.1,
+                    learning_rate = 0.001,
+                    epochs = 15):
+    """
+    Return the dictionary of model's parameters for preprocessing and learning
+
+    Parameters
+    ----------
+    model_name : string
+        name of model's architecture, the possible choise are:
+        'MobileNetV2' = Mobile Network form tensorflow
+        'VGG_16' = VGG-16 form tensorflow
+
+    Return
+    ------
+    model_dict : dictionary
+        model architecture parameters dictionary
+    """
+    model_dict = {}
+
+    ## Load image parameters
+    model_dict['BACH_SIZE'] = BACH_SIZE
+    model_dict['IMG_SIZE'] = IMG_SIZE
+    model_dict['val_split'] = val_split
+
+    ## Preprocessing 
+    if model_name == 'MobileNetV2':
+        model_dict['preprocessing'] = tf.keras.applications.mobilenet_v2.preprocess_input
+        model_dict['base_model'] = tf.keras.applications.mobilenet_v2.MobileNetV2
+
+    ## Training hyperparameters
+    model_dict['learning_rate'] = learning_rate
+    model_dict['epochs'] = epochs
+    return model_dict
+
 def preprocess_input_model():
 	"""
 	Preprocessing for selected pretrined model
@@ -68,16 +106,16 @@ def preprocess_input_model():
 	"""
 	return tf.keras.applications.resnet.preprocess_input
 
-def plane_model(image_shape, data_augmentation):
+def classification_model(model_dict, data_augmentation):
     """
 	Classification model for Plane attribute.
 	Last layer is Dense(6)
     """
     
     
-    input_shape = image_shape + (3,)
+    input_shape = model_dict['IMG_SIZE']+ (3,)
     
-    base_model = tf.keras.applications.resnet50.ResNet50(input_shape=input_shape,
+    base_model = model_dict['base_model'](input_shape=input_shape,
                                                    include_top=False, # <== Important!!!!
                                                    weights='imagenet') # From imageNet
     
@@ -92,7 +130,7 @@ def plane_model(image_shape, data_augmentation):
     
     # data preprocessing using the same weights the model was trained on
     # Already Done -> preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
-    preprocess_input = tf.keras.applications.resnet.preprocess_input	
+    preprocess_input = model_dict['preprocessing']
     x = preprocess_input(x) 
     
     # set training to False to avoid keeping track of statistics in the batch norm layer
@@ -104,8 +142,8 @@ def plane_model(image_shape, data_augmentation):
     #include dropout with probability of 0.2 to avoid overfitting
     x = tfl.Dropout(0.2)(x)
         
-    # create a prediction layer with one neuron (as a classifier only needs one)
-    prediction_layer = tfl.Dense(6)
+    # create a prediction layer with 6 neuron 
+    prediction_layer = tfl.Dense(6, activation='sigmoid')
     
     outputs = prediction_layer(x) 
     model = tf.keras.Model(inputs, outputs)
