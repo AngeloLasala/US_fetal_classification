@@ -5,9 +5,9 @@ import os
 import numpy as np 
 import pandas as pd 
 from PIL import Image
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import imageio
-from keras.preprocessing.image import  load_img, save_img, img_to_array
-# from keras.layers import Resizing
+from makedir import *
 import matplotlib.pyplot as plt
 
 def data_number_example(data, attribute):
@@ -129,6 +129,8 @@ def brain_plot(data, n_examples = 5):
 def split_data(data):
 	"""
 	Split the dataset in train and test looking at the "Train " attribute
+	ATTECTION: with original data image this fuction create two variable (train_set and test_set)
+	which could fill RAM. Before appling split_data, I suggest to preprocess the images.
 
 	Parameters
 	----------
@@ -219,54 +221,158 @@ def normalization(image, a, b):
 		resize of the image
 	"""
 	image = np.array(image, dtype=np.float32)
-	print(type(image[0][0]))
 
 	x_max = image.max()
 	x_min = image.min()
-	print(x_min, x_max)
 	
 	new_image = (b-a) * (image - x_min)/(x_max-x_min) + a
-	print(new_image.min(), new_image.max())
+	
 
 	return new_image
+
+def processing_image(image,
+					input_size = (224,224),
+					resampling = Image.Resampling.LANCZOS,
+					scaler = 'Normalization',
+					a = 0,
+					b = 1,
+					):
+	"""
+	Process original image and return the input shape for learning. 
+	I can do this with Tensorflow too.
+
+	The main steps are:
+	1) Reshape: set the total number of pixel in the form (height, width)
+	2) Normalization: normalize the pixel value
+	3) Convet: from greyscale to RGB mode
+
+	Parameters
+	----------
+	image : image from Image.open,
+		imported image
 	
+	input_size : tuple 
+		input size to DL architecture
+
+	scaler: string,
+		'MinMax', 'StandardScaler', 'Normalization'
+
+	Result
+	------
+	image_to_save : image
+		processed image
+
+	"""
+	# 1) Reshape
+	img_reshape = image.resize(input_size, resampling)
+
+	# 2) convert to RGB
+	img_rgb = img_reshape.convert('RGB')
+
+	# 2) Normalization
+	if scaler == 'MinMaxScaler':
+		scaler = MinMaxScaler()
+		scaler.fit(img_rgb)
+		img_scaled = scaler.transform(img_rgb)
+
+	if scaler == 'StandardScaler':
+		scaler = StandardScaler()
+		scaler.fit(img_rgb)
+		img_scaled = scaler.transform(img_rgb) 
+
+	if scaler == 'Normalization':
+		img_scaled = normalization(img_rgb, a, b)
+
+	image_to_save = img_scaled
+
+	return image_to_save 
+
+def preprocess_data(data_frame,
+				    images_path = 'FETAL_PLANES_ZENODO/Images', 
+					folder_name = 'Preprocess_image',
+					scaler='Normalization',  
+					a=-1, 
+					b=1):
+	"""
+	Make directory with preprocessed data.
+	"""
+	folder_name = 'Preprocess_image'
+	smart_makedir(folder_name)
+
+	for index in range(data_frame.shape[0]):
+		print(index)
+		image_path = images_path +'/'+ data_frame.iloc[index]['Image_name']+'.png'
+		img = Image.open(image_path)
+		img_to_save = processing_image(img, scaler=scaler, a=a, b=b)
+		np.save(folder_name + '/'+ data_frame.iloc[index]['Image_name'], img_to_save)
+
+def target_label(data_frame, attribute):
+	"""
+	Return the data set of target label of given attribute.
+	Target label: [0,...,1,...0] with shape (lenght_attributes_classes)
+
+	Parameters
+	----------
+	data_frame: pandas data frame
+		data frame
+
+	attribute: string
+		attibute to classify
+	
+	Return
+	------
+	y_data : numpy.array
+		data set of target label
+	"""
+	N = len(data_frame[attribute].unique())
+	plane_dict = {plane_cls:i for i, plane_cls  in enumerate(data_frame[attribute].unique())}
+	print(plane_dict)
+	y_data = []
+	for index in range(data_frame.shape[0]):
+		y_image = np.zeros((N))
+		image_plane_cls = data_frame.iloc[index][attribute]
+		y_image[plane_dict[image_plane_cls]] = 1
+		y_data.append(y_image)
+
+	return np.array(y_data)
+
+
 if __name__ == '__main__':
 	images_path = 'FETAL_PLANES_ZENODO/Images'
 	metadata_path = 'FETAL_PLANES_ZENODO/FETAL_PLANES_DB_data.csv'
+
+	## Basic Information
+	data_frame = pd.read_csv(metadata_path, index_col=None)
+	image_list = os.listdir(images_path)
+
+	print('ATTRIBUTES')
+	print(f'{data_frame.columns}')
+	print('==============================================')
+
+	plane_dict = data_number_example(data_frame, 'Plane')
+	print()
+	
+	# List of image's path of selected attibutes and value
+	index = 50
+	fetal_brain_image = image_paths(data_frame, 'Plane', 'Fetal brain')
+
+	# Simple Image rapreentation
+	brain_plot(data_frame, 6)
+
+	## Check incongruent samples: 3D array and strage image shape
+	print('Start split train and test: takes about 2.0 minutes')
+	train_set, test_set = split_data(data_frame)
+	print('OK! splitting complete \n')
+
+	# Incongruent image on test  
+	stange_img_pos = check_anomalies(data_frame, train_set, 'train')
+	print(f'anomalies: {len(stange_img_pos)}')
+
+	## Check normalization
 	img = Image.open(images_path+'/Patient01792_Plane3_1_of_1.png')
 	aa = np.random.rand(224,224)*255
 
 	img_r= normalization(img, a=-5, b=1)
-
-	# print(aa_r.max(), aa_r.min())
-
-
-	# ## Basic Information
-	# data_frame = pd.read_csv(metadata_path, index_col=None)
-	# image_list = os.listdir(images_path)
-
-	# print('ATTRIBUTES')
-	# print(f'{data_frame.columns}')
-	# print('==============================================')
-
-	# plane_dict = data_number_example(data_frame, 'Plane')
-	# print()
-	
-	# # List of image's path of selected attibutes and value
-	# index = 50
-	# fetal_brain_image = image_paths(data_frame, 'Plane', 'Fetal brain')
-
-	# # Simple Image rapreentation
-	# brain_plot(data_frame, 6)
-
-	# ## Check incongruent samples: 3D array and strage image shape
-	# print('Start split train and test: takes about 2.0 minutes')
-	# train_set, test_set = split_data(data_frame)
-	# print('OK! splitting complete \n')
-
-	# # Incongruent image on test  
-	# stange_img_pos = check_anomalies(data_frame, train_set, 'train')
-	# print(f'anomalies: {len(stange_img_pos)}')
 
 	# ## PLOTS ################################
 	plt.imshow(img)
