@@ -5,10 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import argparse
-import tensorflow as tf
-import tensorflow.keras.layers as tfl
 from tensorflow.keras.preprocessing import image_dataset_from_directory
-from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
 
 from classification_utils import *
 
@@ -21,7 +18,7 @@ if __name__ == '__main__':
 
 	## MODEL STRUCTURE
 	model_name = args.model_name
-	model_par = model_parameter(model_name, epochs=1)
+	model_par = model_parameter(model_name)
 
 	## Model dictianory of parameters
 	BACH_SIZE = model_par['BACH_SIZE']
@@ -56,7 +53,8 @@ if __name__ == '__main__':
 	data_augmentation = data_augmenter()
 
 	## MODEL
-	model = classification_model(model_par, data_augmentation)
+	model = classification_model(model_par, data_augmentation, args.attribute)
+	print(model.summary())
 
 	## TRAINING
 	learning_rate = model_par['learning_rate']
@@ -69,7 +67,7 @@ if __name__ == '__main__':
 
 	## SAVE MODEL and PARAMETERS FILE
 	classification_path = 'Images_classification_'+ args.attribute
-	models_path = 'Images_classification_'+ args.attribute + '/models'
+	models_path = 'Images_classification_'+ args.attribute + '/models' + '/'+ args.model_name
 	model.save(models_path + '/' + model_name, save_format='h5')
 
 	with open(models_path + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:
