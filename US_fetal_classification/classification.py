@@ -12,7 +12,7 @@ from classification_utils import *
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Main for classification problem of US fetal image')
 	parser.add_argument("attribute", type=str, help="Attributo to cliification task: 'Plane' or 'Brain_plane'")
-	parser.add_argument("model_name", type=str, help="""Model name: 'MobileNetV2'""")
+	parser.add_argument("model_name", type=str, help="""Model name: 'MobileNetV2'; 'VGG_16'; 'DenseNet_169""")
 	
 	args = parser.parse_args()
 
@@ -57,17 +57,22 @@ if __name__ == '__main__':
 	print(model.summary())
 
 	## TRAINING
-	learning_rate = model_par['learning_rate']
-	model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-              	   loss='sparse_categorical_crossentropy',
-                   metrics=['accuracy'])
+	# learning_rate = model_par['learning_rate']
+	# model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+    #           	   loss='sparse_categorical_crossentropy',
+    #                metrics=['accuracy'])
 	
-	epochs = model_par['epochs']
-	history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
+	# epochs = model_par['epochs']
+	# history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
 
 	## SAVE MODEL and PARAMETERS FILE
 	classification_path = 'Images_classification_'+ args.attribute
-	models_path = 'Images_classification_'+ args.attribute + '/models' + '/'+ args.model_name
+	models_path = 'Images_classification_' + args.attribute +'/models/' + args.model_name + '_'
+
+	if args.model_name + '_' in os.listdir('Images_classification_' + args.attribute +'/models'):
+		pass
+	else: smart_makedir(models_path, trial=True)
+
 	model.save(models_path + '/' + model_name, save_format='h5')
 
 	with open(models_path + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:

@@ -13,6 +13,8 @@ import tensorflow as tf
 import tensorflow.keras.layers as tfl
 from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation, RandomTranslation, RandomCrop
 
+import seaborn as sns
+import matplotlib.pyplot as plt     
 
 def dataset_folder(data, attribute, 
                     name_folder = 'Images_classification',
@@ -110,7 +112,7 @@ def model_parameter(model_name,
                     BACH_SIZE = 32,
 	                IMG_SIZE = (224,224),
 	                val_split = 0.1,
-                    imagenet_pretrain = True,
+                    retraining = False,
                     learning_rate = 0.001,
                     epochs = 15):
     """
@@ -150,7 +152,7 @@ def model_parameter(model_name,
         model_dict['base_model'] = tf.keras.applications.densenet.DenseNet169
 
     ## Training hyperparameters
-    model_dict['imagenet_pretrain'] = imagenet_pretrain
+    model_dict['retraining'] = retraining
     model_dict['learning_rate'] = learning_rate
     model_dict['epochs'] = epochs
     return model_dict
@@ -194,7 +196,7 @@ def classification_model(model_dict, data_augmentation, attribute):
   
     
     # Freeze the base model by making it non trainable
-    base_model.trainable = model_dict['imagenet_pretrain'] 
+    base_model.trainable = model_dict['retraining'] 
     
     # create the input layer (Same as the imageNetv2 input size)
     inputs = tf.keras.Input(shape=input_shape) 
@@ -227,7 +229,36 @@ def classification_model(model_dict, data_augmentation, attribute):
     
     return model
 
-def evlatuation_model(model, test_set):
+def true_labels(test_path, test_data):
+    """
+    True label of slected path for classification
+
+    Parameters
+    ----------
+    test_path : string
+        test's path for classification problem
+
+    test_data : tf.Dataset
+        dataset from test path
+
+    Returns
+    -------
+    true_label : list
+        list of true labels
+    """
+
+    count = 0
+    for direct in os.listdir(test_path):
+        count += len(os.listdir(test_path + '/' + direct))
+    
+    true_lab = []
+    for images, labels in test_data.take(count):
+        # print(labels)
+        true_lab.append(labels[0].numpy())
+
+    return true_lab
+
+def evaluation_model(model, test_set):
     """
     Evaluate the model on the teat set and return the main 
     prediction estimation
@@ -249,7 +280,12 @@ def evlatuation_model(model, test_set):
 
     return evaluation, prediction
 
-def statistical_analysis(model, test_set):
+def statistical_analysis(y_true, y_pred):
     """
     Statistical analysis of trained model
+
+    Parameters
+    ----------
     """
+
+    ##Confu
