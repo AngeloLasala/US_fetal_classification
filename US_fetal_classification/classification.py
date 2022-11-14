@@ -67,20 +67,26 @@ if __name__ == '__main__':
 
 	## SAVE MODEL and PARAMETERS FILE
 	classification_path = 'Images_classification_'+ args.attribute
-	models_path = 'Images_classification_' + args.attribute +'/models_gpu_local/' + args.model_name + '_'
+	models_path = 'Images_classification_' + args.attribute +'/models/' + args.model_name + '_'
 
 	if args.model_name + '_' in os.listdir('Images_classification_' + args.attribute +'/models'):
 		pass
 	else: smart_makedir(models_path, trial=True)
 
-	model.save(models_path + '/' + model_name, save_format='h5')
+	## check other model are trined
+	if len(os.listdir(models_path)) == 0 :
+		model_folder = models_path + '/train_1'
+		smart_makedir(model_folder)
+	else: 
+		count = len(os.listdir(models_path))
+		model_folder = models_path + '/train_' + str(count+1)
+		smart_makedir(model_folder)
+		
+	model.save(model_folder + '/' + model_name, save_format='h5')
 
-	with open(models_path + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:
+	with open(model_folder + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:
 		file.write(f'\n Model Name: {model_name} \n ')
 		model.summary(print_fn=lambda x: file.write(x + '\n'))
-
-		for par in model_par.keys():
-			file.write(f'\n {par}: {model_par[par]} \n ')
 
 
 	
