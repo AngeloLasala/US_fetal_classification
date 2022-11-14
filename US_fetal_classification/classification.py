@@ -57,17 +57,17 @@ if __name__ == '__main__':
 	print(model.summary())
 
 	## TRAINING
-	# learning_rate = model_par['learning_rate']
-	# model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-    #           	   loss='sparse_categorical_crossentropy',
-    #                metrics=['accuracy'])
+	learning_rate = model_par['learning_rate']
+	model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+              	   loss='sparse_categorical_crossentropy',
+                   metrics=['accuracy'])
 	
-	# epochs = model_par['epochs']
-	# history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
+	epochs = model_par['epochs']
+	history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
 
 	## SAVE MODEL and PARAMETERS FILE
 	classification_path = 'Images_classification_'+ args.attribute
-	models_path = 'Images_classification_' + args.attribute +'/models/' + args.model_name + '_'
+	models_path = 'Images_classification_' + args.attribute +'/models_gpu_local/' + args.model_name + '_'
 
 	if args.model_name + '_' in os.listdir('Images_classification_' + args.attribute +'/models'):
 		pass
