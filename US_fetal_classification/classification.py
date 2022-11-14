@@ -95,15 +95,6 @@ if __name__ == '__main__':
 	np.save(model_folder + '/history_val_accuracy', np.array(hist_val_accuracy))
 	np.save(model_folder + '/history_loss', np.array(hist_loss))
 	np.save(model_folder + '/history_val_loss', np.array(hist_val_loss))
-	
-
-
-	 = [0.] + history.history['accuracy']
-	hist_val_accuracy = [0.] + history.history['val_accuracy']
-	hist_loss = history.history['loss']
-	hist_val_loss = history.history['val_loss']
-
-
 
 	with open(model_folder + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:
 		file.write(f'\n Model Name: {model_name} \n ')
