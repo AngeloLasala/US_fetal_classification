@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
 	## MODEL STRUCTURE
 	model_name = args.model_name
-	model_par = model_parameter(model_name)
+	model_par = model_parameter(model_name, learning_rate=0.0001, epochs=20, frozen_layers=6)
 
 	## Model dictianory of parameters
 	BACH_SIZE = model_par['BACH_SIZE']
@@ -58,13 +58,21 @@ if __name__ == '__main__':
 
 	## TRAINING
 	learning_rate = model_par['learning_rate']
+
+	callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5)
 	model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
               	   loss='sparse_categorical_crossentropy',
-                   metrics=['accuracy'])
+                   metrics=['accuracy'],
+				   callbacks=[callback])
 	
 	epochs = model_par['epochs']
 	history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs)
 
+	hist_accuracy = [0.] + history.history['accuracy']
+	hist_val_accuracy = [0.] + history.history['val_accuracy']
+	hist_loss = history.history['loss']
+	hist_val_loss = history.history['val_loss']
+	
 	## SAVE MODEL and PARAMETERS FILE
 	classification_path = 'Images_classification_'+ args.attribute
 	models_path = 'Images_classification_' + args.attribute +'/models/' + args.model_name + '_'
@@ -83,6 +91,19 @@ if __name__ == '__main__':
 		smart_makedir(model_folder)
 		
 	model.save(model_folder + '/' + model_name, save_format='h5')
+	np.save(model_folder + '/history_accuracy', np.array(hist_accuracy))
+	np.save(model_folder + '/history_val_accuracy', np.array(hist_val_accuracy))
+	np.save(model_folder + '/history_loss', np.array(hist_loss))
+	np.save(model_folder + '/history_val_loss', np.array(hist_val_loss))
+	
+
+
+	 = [0.] + history.history['accuracy']
+	hist_val_accuracy = [0.] + history.history['val_accuracy']
+	hist_loss = history.history['loss']
+	hist_val_loss = history.history['val_loss']
+
+
 
 	with open(model_folder + '/' + model_name +'_summary.txt', 'w', encoding='utf-8') as file:
 		file.write(f'\n Model Name: {model_name} \n ')
