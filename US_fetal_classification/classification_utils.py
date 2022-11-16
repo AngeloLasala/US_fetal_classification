@@ -6,6 +6,7 @@ import os
 import numpy as np 
 import pandas as pd 
 from PIL import Image
+from sklearn.metrics import classification_report
 from makedir import *
 
 import tensorflow as tf
@@ -111,7 +112,8 @@ def model_parameter(model_name,
                     BACH_SIZE = 32,
 	                IMG_SIZE = (224,224),
 	                val_split = 0.1,
-                    retraining = False,
+                    retraining = True,
+                    frozen_layers = -1,
                     learning_rate = 0.001,
                     epochs = 15):
     """
@@ -124,6 +126,11 @@ def model_parameter(model_name,
         'MobileNetV2' = Mobile Network form tensorflow
         'VGG_16' = VGG-16 form tensorflow
         'DenseNet_169' = .....
+
+    frozen_layers : integer
+        number of frozen leyers stating for the lower level leyers.
+        default = -1 means all the layer of base_model are frozen (equal to retraininf = False)
+        frozen_layers = 0 means all the parameters are re_trained 
 
     Return
     ------
@@ -153,6 +160,7 @@ def model_parameter(model_name,
     ## Training hyperparameters
     model_dict['retraining'] = retraining
     model_dict['learning_rate'] = learning_rate
+    model_dict['frozen_layers'] = frozen_layers
     model_dict['epochs'] = epochs
     return model_dict
 
@@ -196,6 +204,12 @@ def classification_model(model_dict, data_augmentation, attribute):
     
     # Freeze the base model by making it non trainable
     base_model.trainable = model_dict['retraining'] 
+    if model_dict['retraining']:
+        print("Number of layers in the base model: ", len(base_model.layers))
+        # Freeze all the layers before the `fine_tune_at` layer
+        for layer in base_model.layers[:model_dict['frozen_layers']]:
+            print('Layer ' + layer.name + ' frozen.')
+            layer.trainable = False
     
     # create the input layer (Same as the imageNetv2 input size)
     inputs = tf.keras.Input(shape=input_shape) 
@@ -279,12 +293,32 @@ def evaluation_model(model, test_set):
 
     return evaluation, prediction
 
-def statistical_analysis(y_true, y_pred):
+def statistical_analysis(y_test, y_pred, test_dataset):
     """
-    Statistical analysis of trained model
+    Statistical analysis of trained model. For each classes compute
+    the precision, recall and F1-score
 
     Parameters
     ----------
-    """
+    y_test : array,
+        true labels of test set
+    
+    y_pred : array,
+        predicted labels from model.predict()
 
-    ##Confu
+    test_dataset : tf.Dataset
+        test dataset
+
+    Returns
+    -------
+    task_report : dict
+        dictionary of statistical metrics
+
+    """
+    classes = test_dataset.class_names
+    # from sklearn.metrics import classification_report
+    print('\nClassification Report\n')
+    print(classification_report(y_test, y_pred, target_names=classes))
+    task_report = classification_report(y_test, y_pred, target_names=classes, output_dict=True)
+
+    return task_report
