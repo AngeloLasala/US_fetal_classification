@@ -11,7 +11,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 
 from makedir import *
-from classification_utils import true_labels
+from classification_utils import true_labels, statistical_analysis
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Main for classification problem of US fetal image')
@@ -28,10 +28,11 @@ if __name__ == '__main__':
                                                 image_size=(224,224),
                                                 interpolation='bilinear')
 
-    models_path = 'Images_classification_' + args.attribute +'/models_from_drive/' + args.model_name + '_'
+    models_path = 'Images_classification_' + args.attribute +'/models_from_drive_2/' + args.model_name + '_'
+    models_path = models_path + '/train_6'
     model = tf.keras.models.load_model(models_path + '/'+ args.model_name)
-    # print(model.summary())
-    # print(test_dataset.class_names)
+    print(model.summary())
+    print(test_dataset.class_names)
     
     ## TRUE AND PREDICTED LABELS
     true_labels = true_labels(test_path, test_dataset)
@@ -60,18 +61,16 @@ if __name__ == '__main__':
     m_3 =  tf.keras.metrics.SparseTopKCategoricalAccuracy(k=3)
     m_3.update_state(true_labels, prediction)
 
+    ## PRECISION, RECALL and F1-SCORE
+    report_dict = statistical_analysis(true_labels, predicted_labels, test_dataset)
+
     print(f'ACCURACY = {cf.diagonal().mean():.3f} +- {cf.diagonal().std(ddof=1):.3f}')
     print(f'top-1 error = {1-m_1.result().numpy()}')
     print(f'top-3 error = {1-m_3.result().numpy()}')
 
     ## SAVE STATISTIC
-    save_path = 'Images_classification_' + args.attribute +'/models_from_drive/' + args.model_name + '_'
-    print(save_path)
-    if args.model_name + '_' in os.listdir('Images_classification_' + args.attribute +'/models'):
-    	pass
-    else: smart_makedir(save_path)
-    np.save(save_path + '/confusion', cf)
-    np.save(save_path + '/prediction', np.array(prediction))
+    np.save(models_path + '/confusion', cf)
+    np.save(models_path + '/prediction', np.array(prediction))
 
     fig, ax= plt.subplots(nrows=1, ncols=1, figsize=(10,10), num='confusion_matrix')
 
@@ -84,9 +83,9 @@ if __name__ == '__main__':
     ax.xaxis.set_ticklabels(classes)
     ax.yaxis.set_ticklabels(classes)
     
-    plt.savefig(save_path + '/confusion_matrix')
+    plt.savefig(models_path + '/confusion_matrix')
     # plt.show()
-    with open(save_path + '/' +'statistic.txt', 'w', encoding='utf-8') as file:
+    with open(models_path + '/' +'statistic.txt', 'w', encoding='utf-8') as file:
         file.write(f'ACCURACY = {cf.diagonal().mean():.3f} +- {cf.diagonal().std(ddof=1):.3f} \n')
         file.write(f'top-1 error = {1-m_1.result().numpy()} \n')
         file.write(f'top-3 error = {1-m_3.result().numpy()} \n')
