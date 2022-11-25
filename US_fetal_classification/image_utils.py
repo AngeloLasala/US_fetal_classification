@@ -336,6 +336,34 @@ def target_label(data_frame, attribute):
 
 	return np.array(y_data)
 
+def get_img_array(img_path, size):
+	"""
+	Return the image in numpy array ready to be 'predicted'.  trasform the images in
+	size (1, model_par['IMG_SIZE'][0], model_par['IMG_SIZE'][0], 3)
+	used in cam.py 
+
+	Parameters
+	----------
+	img_path : string
+		path of images
+
+	size : tuple
+		output size of image 
+
+	Return
+	------
+	array : numpy array 
+		4-d array
+	"""
+    # `img` is a PIL image of size model_par['IMG_SIZE']
+	img = tf.keras.preprocessing.image.load_img(img_path, target_size=size)
+    # `array` is a float32 Numpy array of shape (model_par['IMG_SIZE'][0], model_par['IMG_SIZE'][0], 3)
+	array = tf.keras.preprocessing.image.img_to_array(img)
+    # We add a dimension to transform our array into a "batch"
+    # of size (1, model_par['IMG_SIZE'][0], model_par['IMG_SIZE'][0], 3)
+	array = np.expand_dims(array, axis=0)
+	return array
+
 
 if __name__ == '__main__':
 	images_path = 'FETAL_PLANES_ZENODO/Images'
