@@ -5,8 +5,9 @@ import os
 import numpy as np 
 import pandas as pd 
 from PIL import Image
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import imageio
+import tensorflow as tf
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from makedir import *
 import matplotlib.pyplot as plt
 
