@@ -14,7 +14,8 @@ import tensorflow.keras.layers as tfl
 from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation, RandomTranslation, RandomCrop
 
 import seaborn as sns
-import matplotlib.pyplot as plt     
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 def dataset_folder(data, attribute, 
                     name_folder = 'Images_classification',
@@ -322,3 +323,48 @@ def statistical_analysis(y_test, y_pred, test_dataset):
     task_report = classification_report(y_test, y_pred, target_names=classes, output_dict=True)
 
     return task_report
+
+## CAM SECTION ################################################################################
+def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
+    """
+    Save the CAM for selectec image. See cam_easy.py
+
+    Parameter
+    ---------
+    img_path : string
+        original image path
+
+    heatmap: numpy array
+        class activation map
+
+    cam_pat : string
+        directory used to save
+
+    alpha = float
+        shadowing of heatmap
+    """
+    # Load the original image
+    img = tf.keras.preprocessing.image.load_img(img_path)
+    img = tf.keras.preprocessing.image.img_to_array(img)
+
+    # Rescale heatmap to a range 0-255
+    heatmap = np.uint8(255 * heatmap)
+
+    # Use jet colormap to colorize heatmap
+    jet = cm.get_cmap("jet")
+
+    # Use RGB values of the colormap
+    jet_colors = jet(np.arange(256))[:, :3]
+    jet_heatmap = jet_colors[heatmap]
+
+    # Create an image with RGB colorized heatmap
+    jet_heatmap = tf.keras.preprocessing.image.array_to_img(jet_heatmap)
+    jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
+    jet_heatmap = tf.keras.preprocessing.image.img_to_array(jet_heatmap)
+
+    # Superimpose the heatmap on original image
+    superimposed_img = jet_heatmap * alpha + img
+    superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
+
+    # Save the superimposed image
+    superimposed_img.save(cam_path)
