@@ -13,12 +13,14 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Main for classification problem of US fetal image')
 	parser.add_argument("attribute", type=str, help="Attributo to cliification task: 'Plane' or 'Brain_plane'")
 	parser.add_argument("model_name", type=str, help="""Model name: 'MobileNetV2'; 'VGG_16'; 'DenseNet_169""")
-	parser.add_argument("-frozen", default=-1, type=int, help="Number of frosez leyers in model_base")
+	parser.add_argument("-epochs", default=20, type=int, help="Number of epochs")
+	parser.add_argument("-frozen", default=-1, type=int, help="Number of frozez leyers in model_base")
 	args = parser.parse_args()
 	
+	print(args.epochs)
 	## MODEL STRUCTURE
 	model_name = args.model_name
-	model_par = model_parameter(model_name, learning_rate=0.0001, epochs=15, frozen_layers=args.frozen)
+	model_par = model_parameter(model_name, learning_rate=0.0001, epochs=20, frozen_layers=args.frozen)
 
 	## Model dictianory of parameters
 	BACH_SIZE = model_par['BACH_SIZE']
