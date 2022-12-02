@@ -236,7 +236,7 @@ def classification_model(model_dict, data_augmentation, attribute):
     if attribute == 'Plane': class_nodes = 6
     if attribute == 'Brain_plane': class_nodes = 4
     
-    prediction_layer = tfl.Dense(class_nodes, activation='sigmoid')
+    prediction_layer = tfl.Dense(class_nodes, activation='softmax')
     
     outputs = prediction_layer(x) 
     model = tf.keras.Model(inputs, outputs)
