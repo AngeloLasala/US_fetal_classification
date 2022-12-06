@@ -20,7 +20,7 @@ if __name__ == '__main__':
 	print(args.epochs)
 	## MODEL STRUCTURE
 	model_name = args.model_name
-	model_par = model_parameter(model_name, learning_rate=0.0001, epochs=20, frozen_layers=args.frozen)
+	model_par = model_parameter(model_name, learning_rate=0.0001, epochs=args.epochs, frozen_layers=args.frozen)
 
 	## Model dictianory of parameters
 	BACH_SIZE = model_par['BACH_SIZE']
