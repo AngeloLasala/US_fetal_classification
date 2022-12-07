@@ -17,7 +17,6 @@ if __name__ == '__main__':
 	parser.add_argument("-frozen", default=-1, type=int, help="Number of frozez leyers in model_base")
 	args = parser.parse_args()
 	
-	print(args.epochs)
 	## MODEL STRUCTURE
 	model_name = args.model_name
 	model_par = model_parameter(model_name, learning_rate=0.0001, epochs=args.epochs, frozen_layers=args.frozen)
@@ -46,7 +45,20 @@ if __name__ == '__main__':
                                              validation_split=val_split,
                                              subset='validation',
                                              seed=42)
+	## CLASS WEIGHTS
+	dataset_unbatched = tuple(train_dataset.unbatch())
+	labels = []
+	for (image,label) in dataset_unbatched:
+		# print(image.shape, label)
+		labels.append(label.numpy())
+	labels = pd.Series(labels)
+	count = labels.value_counts()
+	class_count = count.to_dict()
 
+	# function for class weight
+	class_weight = make_class_weight(class_count)
+	print(class_weight)
+			
 	##  Prefetch step for optimaze the memory 
 	AUTOTUNE = tf.data.experimental.AUTOTUNE
 	train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
@@ -67,7 +79,10 @@ if __name__ == '__main__':
                    metrics=['accuracy'])
 	
 	epochs = model_par['epochs']
-	history = model.fit(train_dataset, validation_data=validation_dataset, epochs=epochs, callbacks=[callback])
+	history = model.fit(train_dataset, validation_data=validation_dataset, 
+						epochs=epochs, 
+						callbacks=[callback],
+						class_weight=class_weight)
 
 	hist_accuracy = [0.] + history.history['accuracy']
 	hist_val_accuracy = [0.] + history.history['val_accuracy']
@@ -106,4 +121,6 @@ if __name__ == '__main__':
 		for par in model_par.keys():
 			file.write(f'\n {par}: {model_par[par]} \n ')
 
-	
+		file.write(f'Class Weight\n')
+		for k in class_weight.keys():
+			file.write(f'{k}: {class_weight[k]}\n')
