@@ -324,6 +324,32 @@ def statistical_analysis(y_test, y_pred, test_dataset):
 
     return task_report
 
+def make_class_weight(count_dir):
+    """
+    Return the class weight for unbalanced data to sutable 
+    train a model. w_i = (n_sample / n_classes) * (1/n_i)
+
+    Parameters
+    ----------
+    count_dir : directory
+        dir with number of sample of each class. keys=class value=n_i
+
+    Return
+    ------
+    class_weights : directory
+        dir with class weights
+    """
+    keys_class = count_dir.keys()
+    n_sample = 0
+    for k in keys_class:
+        n_sample += count_dir[k] 
+	
+    class_weight = {}
+    for k in keys_class:
+        class_weight[k] = (n_sample/len(keys_class)) * (1/count_dir[k]) 
+	
+    return class_weight
+
 ## CAM SECTION ################################################################################
 def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
     """
