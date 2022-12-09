@@ -93,7 +93,6 @@ if __name__ == '__main__':
 	## SAVE MODEL and PARAMETERS FILE
 	classification_path = 'Images_classification_'+ args.attribute
 	models_path = 'Images_classification_' + args.attribute +'/models/' + args.model_name + '_'
-
 	if args.model_name + '_' in os.listdir('Images_classification_' + args.attribute +'/models'):
 		pass
 	else: smart_makedir(models_path, trial=True)
@@ -106,7 +105,6 @@ if __name__ == '__main__':
 		count = len(os.listdir(models_path))
 		model_folder = models_path + '/train_' + str(count+1)
 		smart_makedir(model_folder)
-		
 	model.save(model_folder + '/' + model_name, save_format='h5')
 	np.save(model_folder + '/history_accuracy', np.array(hist_accuracy))
 	np.save(model_folder + '/history_val_accuracy', np.array(hist_val_accuracy))
