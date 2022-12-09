@@ -8,6 +8,7 @@ import pandas as pd
 from PIL import Image
 from sklearn.metrics import classification_report
 from makedir import *
+from image_utils import smart_plot, get_img_array, normalization
 
 import tensorflow as tf
 import tensorflow.keras.layers as tfl
@@ -351,7 +352,41 @@ def make_class_weight(count_dir):
     return class_weight
 
 ## CAM SECTION ################################################################################
-def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
+def cam_heatmap(preds, class_weights, last_conv_layer_output):
+    """
+    Heatmap of Class Activation Map regarding the predicted class
+
+    Parameters
+    ----------
+    preds: numpy or tensorflow tensor
+        array of predictions
+
+    class_weight: numpy or tensorflow tensor
+        class weight of the moste rate class prediction. From load_model():
+        class_weights = model.layers[-1].get_weights()[0]
+
+    last_conv_layer_output: tensor
+        convolutional layer used for the heatmap
+
+    Return
+    ------
+    heatmap : numpy array
+        normalized version of calss activation map in range 0-1, The shape
+        depends on the last convulution layer of the model
+
+    """
+    predicted_class = tf.argmax(preds[0])
+    class_weights = class_weights[:,predicted_class]
+    class_weights = np.expand_dims(class_weights, axis=-1)
+
+    last_conv_layer_output = last_conv_layer_output[0,:,:,:]
+
+    heatmap = last_conv_layer_output @ class_weights
+    heatmap = np.squeeze(heatmap)
+    heatmap = normalization(heatmap, 0, 1)
+    return heatmap
+
+def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4, save_it=True):
     """
     Save the CAM for selectec image. See cam_easy.py
 
@@ -366,8 +401,19 @@ def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
     cam_pat : string
         directory used to save
 
-    alpha = float
+    alpha : float
         shadowing of heatmap
+
+    save_it : bool
+        actual save the cam. default=True
+
+    Return
+    ------
+    jet_heatmap : tensor
+        calss activation maps of input image
+    
+    img : tensor
+        imput image
     """
     # Load the original image
     img = tf.keras.preprocessing.image.load_img(img_path)
@@ -393,4 +439,5 @@ def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4):
     superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
 
     # Save the superimposed image
-    superimposed_img.save(cam_path)
+    if save_it : superimposed_img.save(cam_path)
+    return jet_heatmap, img
