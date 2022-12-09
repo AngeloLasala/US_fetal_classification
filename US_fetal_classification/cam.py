@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
 	## LOAD TRAINED MODEL
 	model_par = model_parameter('VGG_16') # we need only the preprocession function
-	models_path = "Images_classification_" + args.attribute + "/models_retrained/" + args.train
+	models_path = "Images_classification_" + args.attribute + "/models/" + 'VGG_16_/' + args.train
 	model = keras.models.load_model(models_path + '/'+ 'VGG_16')
 	print(model.summary(expand_nested=True))
 
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 	print(f"predicted class: {predicted_class} - {train_class[predicted_class]}")
 	smart_plot(data_frame, image_path)
 
-	cam_patient_path = "Images_classification_" + args.attribute + "/CAM/" + patient
+	cam_patient_path = "Images_classification_" + args.attribute + "/CAM_1/" + patient
 	smart_makedir(cam_patient_path)
 	save_cam(image_path, heatmap, cam_path = cam_patient_path + "/cam.jpg")
 	with open(cam_patient_path + '/' +'prediction.txt', 'w', encoding='utf-8') as file:
