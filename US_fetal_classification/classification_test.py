@@ -87,14 +87,15 @@ if __name__ == '__main__':
 
     fig1, ax1= plt.subplots(nrows=1, ncols=1, figsize=(10,10), num='confusion_matrix')
 
-    sns.heatmap(cf, annot=True, fmt='.3g', ax=ax1, cmap='Blues') #annot=True to annotate cells, ftm='g' to disable scientific notation
-    ax1.set_xlabel('Predicted labels')
-    ax1.set_ylabel('True labels')
-    ax1.set_title('Confusion Matrix');
+    sns.set(font_scale=1.2) 
+    sns.heatmap(cf, annot=True, fmt='.2%', ax=ax1, cmap='Blues') #annot=True to annotate cells, ftm='g' to disable scientific notation
+    ax1.set_xlabel('Predicted labels', fontsize=16)
+    ax1.set_ylabel('True labels', fontsize=16)
+    ax1.set_title('Confusion Matrix', fontsize=20);
 
     classes = test_dataset.class_names
-    ax1.xaxis.set_ticklabels(classes)
-    ax1.yaxis.set_ticklabels(classes)
+    ax1.xaxis.set_ticklabels(classes, fontsize=11)
+    ax1.yaxis.set_ticklabels(classes, fontsize=11, va="center")
     plt.savefig(models_path + '/confusion_matrix')
     
     fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(8,8), num='Train_Val_curves')
@@ -112,7 +113,7 @@ if __name__ == '__main__':
     ax[1].plot(val_loss, label=f'Validation Loss: last epoch {val_loss[-1]:.4f}')
     ax[1].legend(loc='upper right')
     ax[1].set_ylabel('Loss')
-    ax[1].set_ylim([0,1.0])
+    ax[1].set_ylim([0,2.0])
     ax[1].set_title('Training and Validation Loss')
     ax[1].set_xlabel('epoch')
     plt.savefig(models_path + '/' + 'Train_Val_curves')
