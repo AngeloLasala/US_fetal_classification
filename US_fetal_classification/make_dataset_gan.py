@@ -119,9 +119,7 @@ if __name__ == '__main__':
 
 		## CAM - SPLIT INPUT(CAM) AND REAL IMAGE(IMG)
 		heatmap = cam_heatmap(preds, class_weights, last_conv_layer_output)
-		input_image, real_image = save_cam(image_path, heatmap, save_it=False)
-		# input_image = tf.cast(input_image, tf.float32)
-		# real_image = tf.cast(real_image, tf.float32)
+		input_image, real_image = save_cam(image_path, heatmap, save_it=False)	
 
 		save_array_as_image(input_image, cam_gan_path + '/' + f'sample_{index}', mode='RGB')
 		save_array_as_image(real_image, image_gan_path + '/' + f'sample_{index}')
