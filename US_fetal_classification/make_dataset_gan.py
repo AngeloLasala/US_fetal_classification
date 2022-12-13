@@ -55,11 +55,12 @@ if __name__ == '__main__':
 	data_frame = pd.read_csv(metadata_path, index_col=None)
 
 	## CREATE FOLDER TO SAVE IMAGES
-	gan_train_path = 'GAN/' + args.attribute + '/' + args.clas
-	cam_gan_path = gan_train_path + '/cam_image'
-	image_gan_path = gan_train_path + '/image'
-	smart_makedir(cam_gan_path)
-	smart_makedir(image_gan_path)
+	gan_train_path = 'GAN/' + args.attribute + '/' + args.clas +'/train'
+	# cam_gan_path = gan_train_path + '/cam_image'
+	# image_gan_path = gan_train_path + '/image'
+	# smart_makedir(cam_gan_path)
+	# smart_makedir(image_gan_path)
+	smart_makedir(gan_train_path)
 
 	## MODEL ######################################################################################
 	## LOAD TRAINED MODEL
@@ -120,7 +121,12 @@ if __name__ == '__main__':
 		## CAM - SPLIT INPUT(CAM) AND REAL IMAGE(IMG)
 		heatmap = cam_heatmap(preds, class_weights, last_conv_layer_output)
 		input_image, real_image = save_cam(image_path, heatmap, save_it=False)	
-
-		save_array_as_image(input_image, cam_gan_path + '/' + f'sample_{index}', mode='RGB')
-		save_array_as_image(real_image, image_gan_path + '/' + f'sample_{index}')
+		concatenate_image = np.stack((input_image, real_image), axis=0)
+		print(concatenate_image.shape)
+		print(input_image.shape, real_image.shape)
+		concatenate_image = np.reshape(concatenate_image,
+										(2*real_image.shape[0], real_image.shape[1], real_image.shape[2]))
+		# save_array_as_image(input_image, gan_train_path + '/' + f'cam_sample_{index}', mode='RGB')
+		print(concatenate_image.shape)
+		save_array_as_image(concatenate_image, gan_train_path + '/' + f'sample_{index}')
 	
