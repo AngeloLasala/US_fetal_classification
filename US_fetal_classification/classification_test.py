@@ -83,6 +83,7 @@ if __name__ == '__main__':
 
     ## SAVE STATISTIC
     np.save(models_path + '/confusion', cf)
+    np.save(models_path + '/true_label', np.array(true_labels))
     np.save(models_path + '/prediction', np.array(prediction))
 
     fig1, ax1= plt.subplots(nrows=1, ncols=1, figsize=(10,10), num='confusion_matrix')
