@@ -441,3 +441,24 @@ def save_cam(img_path, heatmap, cam_path="cam.jpg", alpha=0.4, save_it=True):
     # Save the superimposed image
     if save_it : superimposed_img.save(cam_path)
     return jet_heatmap, img
+
+def save_array_as_image(array, path, mode=None, format_img='.png'):
+    """
+    Save the input array in a selecsted format in the selected path
+    
+    Parameters
+    ----------
+    array: numpy array
+        image array
+
+    path: string
+        path's folder when save the image
+    
+    mode: string
+        mode og image, i.e. 'RGB'. Default = None
+    format_img : string (optional)
+        format of image. Default='.png'
+    """
+    img = Image.fromarray(array.astype(np.uint8), mode = mode)
+    img.save(path + format_img)
+
