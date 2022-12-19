@@ -149,9 +149,9 @@ if __name__ == "__main__":
 	# plt.show()
 
 	## TRAINING
-	EPOCHS = 100 * BUFFER_SIZE
+	EPOCHS = 200 * BUFFER_SIZE
 	TIME_EPOCHS = BUFFER_SIZE
-	CKP_EPOCHS = 10 * BUFFER_SIZE
+	CKP_EPOCHS = 200 * BUFFER_SIZE
 
 	generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 	discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
@@ -173,8 +173,3 @@ if __name__ == "__main__":
 		checkpoint_prefix = checkpoint_prefix,
 		time_steps = TIME_EPOCHS,
 		checkpoint_steps = CKP_EPOCHS)
-
-
-
-	
-	
