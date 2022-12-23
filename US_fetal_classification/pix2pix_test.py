@@ -9,7 +9,7 @@ import tensorflow as tf
 from PIL import Image
 from gan_utils import *
 from tensorflow.keras.preprocessing import image_dataset_from_directory
-
+from makedir import *
 from image_utils import normalization
 
 
@@ -44,10 +44,10 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	
 	# MAKE GIF 
-	gan_path = 'GAN/'+ args.attribute + '/' + args.clas
-	frames = [Image.open(image) for image in glob.glob(gan_path + '/GAN_real_time' +  "/*.png")]
-	frame_one = frames[0]
-	frame_one.save(gan_path + '/my_awesome.gif', format="GIF", append_images=frames,save_all=True, duration=100, loop=0)
+	# gan_path = 'GAN/'+ args.attribute + '/' + args.clas
+	# frames = [Image.open(image) for image in glob.glob(gan_path + '/GAN_real_time' +  "/*.png")]
+	# frame_one = frames[0]
+	# frame_one.save(gan_path + '/my_awesome.gif', format="GIF", append_images=frames,save_all=True, duration=100, loop=0)
 
 	## LOAD LAST CHECKPOINT MODEL
 	OUTPUT_CHANNELS = 3
@@ -86,6 +86,9 @@ if __name__ == "__main__":
 	models_path = models_path + '/' + 'train_11'
 	model = tf.keras.models.load_model(models_path + '/VGG_16')
 
+	generated_path = 'GAN/'+ args.attribute + '/' + args.clas + '/synthetic'
+	smart_makedir(generated_path)
+
 	for n, (inp, tar) in enumerate(test_dataset.take(13)):
 		generated_image, real_image = generate_images_test(generator, inp, tar, 
 													   height = 224, weight = 224)
@@ -98,25 +101,26 @@ if __name__ == "__main__":
 		print(f'REAL: {pred_real} - {prediction_real[0]*100}')
 		print(f'GENERATE: {pred_generate}- {prediction_generate[0]*100}')
 
-		## PLOTS
+		## PLOTS and SAVE
+		# figure input - real- generate
 		display_list = [inp[0], real_image[0], generated_image[0]]
 		title = ['INPUT', 'REAL IMAGE', 'GENERATE IMAGE']
 		prediction_title = ['', f' - Classification: {pred_real}, {prediction_real[0][pred_real]*100:.1f}%', 
 								f' - Classification: {pred_generate}, {prediction_generate[0][pred_generate]*100:.1f}%']
-		plt.figure(figsize=(15,8), num=f'Prova_{n}')
+		plt.figure(figsize=(15,8), num=f'testing_{n}')
 		for i in range(3):
 			plt.subplot(1, 3, i+1)
-			
 			plt.title(title[i] + prediction_title[i])
 			# Getting the pixel values in the [0, 1] range to plot.
 			plt.imshow(normalization(display_list[i],0,1))
 			plt.axis('off')
-		# plt.figure()
-		# plt.imshow(real_image[0,...]/255)
-		# plt.figure()
-		# plt.imshow(generated_image[0,...]/255)
-		plt.savefig('GAN/'+ args.attribute + '/' + args.clas + f'/testing{n}.png')
-		plt.show()
+		plt.savefig('GAN/'+ args.attribute + '/' + args.clas + f'/testing_{n}.png')
+		
+		plt.figure(figsize=(6,8), num=f'syntetic_{n}')
+		plt.imshow(normalization(generated_image[0],0,1))
+		plt.axis('off')
+		plt.savefig(generated_path + '/' + f'syntetic_{n}.png')
+		# plt.show()
 
 
 
