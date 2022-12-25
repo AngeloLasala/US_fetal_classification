@@ -1,3 +1,0 @@
-ACCURACY = nan +- nan 
-top-1 error = 0.366998553276062 
-top-3 error = 0.009246110916137695 

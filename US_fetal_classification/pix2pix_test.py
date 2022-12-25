@@ -115,8 +115,8 @@ if __name__ == "__main__":
 			plt.imshow(normalization(display_list[i],0,1))
 			plt.axis('off')
 		plt.savefig('GAN/'+ args.attribute + '/' + args.clas + f'/testing_{n}.png')
-		
-		plt.figure(figsize=(6,8), num=f'syntetic_{n}')
+
+		plt.figure(num=f'syntetic_{n}')
 		plt.imshow(normalization(generated_image[0],0,1))
 		plt.axis('off')
 		plt.savefig(generated_path + '/' + f'syntetic_{n}.png')
