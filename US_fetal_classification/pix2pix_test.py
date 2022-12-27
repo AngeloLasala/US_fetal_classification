@@ -7,9 +7,11 @@ import argparse
 import glob
 import tensorflow as tf
 from PIL import Image
-from gan_utils import *
 from tensorflow.keras.preprocessing import image_dataset_from_directory
+
+from gan_utils import *
 from makedir import *
+from classification_utils import save_array_as_image
 from image_utils import normalization
 
 
@@ -87,7 +89,7 @@ if __name__ == "__main__":
 	model = tf.keras.models.load_model(models_path + '/VGG_16')
 
 	generated_path = 'GAN/'+ args.attribute + '/' + args.clas + '/synthetic'
-	smart_makedir(generated_path)
+	# smart_makedir(generated_path)
 
 	for n, (inp, tar) in enumerate(test_dataset.take(13)):
 		generated_image, real_image = generate_images_test(generator, inp, tar, 
@@ -116,10 +118,11 @@ if __name__ == "__main__":
 			plt.axis('off')
 		plt.savefig('GAN/'+ args.attribute + '/' + args.clas + f'/testing_{n}.png')
 
-		plt.figure(num=f'syntetic_{n}')
-		plt.imshow(normalization(generated_image[0],0,1))
-		plt.axis('off')
-		plt.savefig(generated_path + '/' + f'syntetic_{n}.png')
+		# plt.figure(num=f'syntetic_{n}')
+		# plt.imshow(normalization(generated_image[0],0,1))
+		# plt.axis('off')
+		# plt.savefig(generated_path + '/' + f'syntetic_{n}.png')
+		save_array_as_image(generated_image[0].numpy(), generated_path + '/' + f'synthetic_{n}')
 		# plt.show()
 
 
