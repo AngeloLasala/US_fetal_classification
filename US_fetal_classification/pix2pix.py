@@ -105,7 +105,7 @@ if __name__ == "__main__":
 	main_path_train = 'GAN/'+ args.attribute + '/' + args.clas + '/train'
 	main_path_test = 'GAN/'+ args.attribute + '/' + args.clas + '/test'
 
-	input_image, real_image = load_image(main_path_train + '/sample_8.png')
+	# input_image, real_image = load_image(main_path_train + '/sample_8.png')
 	
 	## PREPROCESSING
 	BUFFER_SIZE = len(os.listdir(main_path_train))   # The facade training set consist of 400 images
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 	IMG_WIDTH = 256      # Each image is 256x256 in size
 	IMG_HEIGHT = 256
 	
-	input_image, real_image = load_image_train(main_path_train + '/sample_8.png')
+	# input_image, real_image = load_image_train(main_path_train + '/sample_8.png')
 
 	## MAKE tf.Dataset
 	train_dataset = tf.data.Dataset.list_files(main_path_train + '/*.png')	
