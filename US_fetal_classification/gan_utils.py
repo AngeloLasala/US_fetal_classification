@@ -577,7 +577,7 @@ def Generator_plane(input_shape = 256, output_channel=1):
 											strides=2,
 											padding='same',
 											kernel_initializer=initializer,
-											activation='tanh')  # (batch_size, 256, 256, 3)
+											activation='tanh')  # (batch_size, 256, 256, 1)
 
 	x = inputs
 
@@ -648,10 +648,10 @@ def discriminator_loss_plane(real_output, fake_output):
 	return total_loss
 
 @tf.function
-def train_step_plane(images, 
+def train_step_plane(images, batch_size,
 					 generator, discriminator,
-					 generator_optimizer, discriminator_optimizer,
-					 batch_size):
+					 generator_optimizer, discriminator_optimizer
+					 ):
 	noise = tf.random.normal([batch_size, 256, 256, 1])
 
 	with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
@@ -676,16 +676,16 @@ def train(dataset, epochs, batch_size,
 		checkpoint_prefix, 
 		epochs_ckp, 
 		path):
-
 	seed = tf.random.normal([16, 256, 256, 1])
 
 	for epoch in range(epochs):
 		start = time.time()
-		print(f'epoch: {epoch}')
+		print(f'epoch: {epoch+1}')
 
 		for image_batch in dataset:
-			train_step_plane(image_batch, generator, discriminator,
-					        generator_optimizer, discriminator_optimizer, batch_size)
+			train_step_plane(image_batch, batch_size,
+							generator, discriminator,
+					        generator_optimizer, discriminator_optimizer, )
 			print('.', end='', flush=True)
 
 
@@ -693,7 +693,7 @@ def train(dataset, epochs, batch_size,
 		display.clear_output(wait=True)
 		generate_and_save_images(generator, epoch+1, seed, path)
 
-		# Save the model every 15 epochs_ckp
+		# Save the model every epochs_ckp epocks
 		if (epoch + 1) % epochs_ckp == 0:
 			checkpoint.save(file_prefix = checkpoint_prefix)
 
@@ -705,12 +705,12 @@ def generate_and_save_images(model, epoch, test_input, path):
 	# Notice `training` is set to False.
 	# This is so all layers run in inference mode (batchnorm).
 	predictions = model(test_input, training=False)
-
+	print(predictions.shape)
 	fig = plt.figure(figsize=(4, 4))
 
 	for i in range(predictions.shape[0]):
 		plt.subplot(4, 4, i+1)
-		plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
+		plt.imshow(predictions[i, :, :, :] * 127.5 + 127.5, cmap='gray')
 		plt.axis('off')
 
 	plt.savefig(path + '/image_at_epoch_{:04d}.png'.format(epoch))
