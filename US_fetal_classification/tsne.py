@@ -85,8 +85,6 @@ if __name__ == '__main__':
 			pass
 	else:
 		smart_makedir(tsne_path)
-	
-	
 
 	# feature extrapolation
 	INPUT_SHAPE = (224,224)
@@ -127,7 +125,7 @@ if __name__ == '__main__':
 	classes = test_dataset.class_names
 	colors = ['C0', 'C1', 'C2', 'C3', 'C4']
 	labels = [] 
-	for img, label in test_dataset.take(2056):
+	for img, label in test_dataset.take(2075):
 		labels.append(label.numpy())
 
 	plt.figure()
@@ -136,7 +134,9 @@ if __name__ == '__main__':
 		current_tx = np.take(tx, indices)
 		current_ty = np.take(ty, indices)
 		print(len(indices))
-		plt.scatter(current_tx, current_ty, c=c, label=classes[idx])
+		if classes[idx] != 'Synthetic': alpha_c = 0.2
+		else : alpha_c = 1 
+		plt.scatter(current_tx, current_ty, c=c, label=classes[idx], alpha=alpha_c)
 
 	plt.legend()
 	plt.show()
