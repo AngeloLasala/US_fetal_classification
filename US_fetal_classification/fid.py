@@ -95,7 +95,7 @@ if __name__ == '__main__':
                                                 	batch_size = 1,
                                                 	image_size = INPUT_SHAPE,
                                                 	interpolation='bilinear')
-	n_real_image = len(os.listdir(fid_path + '/Trans-cerebellum'))
+	n_real_image = len(os.listdir(fid_path + '/Trans-thalamic'))
 	n_syn_image = len(os.listdir(fid_path + '/synthetic'))
 	real_pos, syn_pos = splitting_real_syn(total_dataset, n_real_image + n_syn_image)
 
