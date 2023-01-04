@@ -89,9 +89,9 @@ if __name__ == "__main__":
 	model = tf.keras.models.load_model(models_path + '/VGG_16')
 
 	generated_path = 'GAN/'+ args.attribute + '/' + args.clas + '/synthetic'
-	# smart_makedir(generated_path)
-
-	for n, (inp, tar) in enumerate(test_dataset.take(13)):
+	smart_makedir(generated_path)
+	
+	for n, (inp, tar) in enumerate(test_dataset.take(len(os.listdir(main_path_test)))):
 		generated_image, real_image = generate_images_test(generator, inp, tar, 
 													   height = 224, weight = 224)
 		prediction_real = model.predict(real_image, verbose=1)
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 		# plt.axis('off')
 		# plt.savefig(generated_path + '/' + f'syntetic_{n}.png')
 		save_array_as_image(generated_image[0].numpy(), generated_path + '/' + f'synthetic_{n}')
-		# plt.show()
+		plt.show()
 
 
 
