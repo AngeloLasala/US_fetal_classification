@@ -74,53 +74,53 @@ if __name__ == '__main__':
     m_3.update_state(true_labels, prediction)
 
     ## PRECISION, RECALL and F1-SCORE
-    if args.attribute == 'Plane':
-        report_dict = statistical_analysis(true_labels, predicted_labels, test_dataset)
+    # if args.attribute == 'Plane':
+    report_dict = statistical_analysis(true_labels, predicted_labels, test_dataset)
 
     print(f'ACCURACY = {cf.diagonal().mean():.3f} +- {cf.diagonal().std(ddof=1):.3f}')
     print(f'top-1 error = {1-m_1.result().numpy()}')
     print(f'top-3 error = {1-m_3.result().numpy()}')
 
-    ## SAVE STATISTIC
-    np.save(models_path + '/confusion', cf)
-    np.save(models_path + '/true_label', np.array(true_labels))
-    np.save(models_path + '/prediction', np.array(prediction))
+    # ## SAVE STATISTIC
+    # np.save(models_path + '/confusion', cf)
+    # np.save(models_path + '/true_label', np.array(true_labels))
+    # np.save(models_path + '/prediction', np.array(prediction))
 
-    fig1, ax1= plt.subplots(nrows=1, ncols=1, figsize=(10,10), num='confusion_matrix')
+    # fig1, ax1= plt.subplots(nrows=1, ncols=1, figsize=(10,10), num='confusion_matrix')
 
-    sns.set(font_scale=1.2) 
-    sns.heatmap(cf, annot=True, fmt='.2%', ax=ax1, cmap='Blues') #annot=True to annotate cells, ftm='g' to disable scientific notation
-    ax1.set_xlabel('Predicted labels', fontsize=16)
-    ax1.set_ylabel('True labels', fontsize=16)
-    ax1.set_title('Confusion Matrix', fontsize=20);
+    # sns.set(font_scale=1.2) 
+    # sns.heatmap(cf, annot=True, fmt='.2%', ax=ax1, cmap='Blues') #annot=True to annotate cells, ftm='g' to disable scientific notation
+    # ax1.set_xlabel('Predicted labels', fontsize=16)
+    # ax1.set_ylabel('True labels', fontsize=16)
+    # ax1.set_title('Confusion Matrix', fontsize=20);
 
-    classes = test_dataset.class_names
-    ax1.xaxis.set_ticklabels(classes, fontsize=11)
-    ax1.yaxis.set_ticklabels(classes, fontsize=11, va="center")
-    plt.savefig(models_path + '/confusion_matrix')
+    # classes = test_dataset.class_names
+    # ax1.xaxis.set_ticklabels(classes, fontsize=11)
+    # ax1.yaxis.set_ticklabels(classes, fontsize=11, va="center")
+    # plt.savefig(models_path + '/confusion_matrix')
     
-    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(8,8), num='Train_Val_curves')
-    acc = [0.] + accuracy
-    val_acc = [0.] + val_accuracy
+    # fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(8,8), num='Train_Val_curves')
+    # acc = [0.] + accuracy
+    # val_acc = [0.] + val_accuracy
 
-    ax[0].plot(acc, label='Training Accuracy')
-    ax[0].plot(val_acc, label=f'Validation Accuracy: last epoch {val_accuracy[-1]:.4f}')
-    ax[0].legend(loc='lower right')
-    ax[0].set_ylabel('Accuracy')
-    ax[0].set_ylim([min(plt.ylim()),1])
-    ax[0].set_title('Training and Validation Accuracy')
+    # ax[0].plot(acc, label='Training Accuracy')
+    # ax[0].plot(val_acc, label=f'Validation Accuracy: last epoch {val_accuracy[-1]:.4f}')
+    # ax[0].legend(loc='lower right')
+    # ax[0].set_ylabel('Accuracy')
+    # ax[0].set_ylim([min(plt.ylim()),1])
+    # ax[0].set_title('Training and Validation Accuracy')
 
-    ax[1].plot(loss, label='Training Loss')
-    ax[1].plot(val_loss, label=f'Validation Loss: last epoch {val_loss[-1]:.4f}')
-    ax[1].legend(loc='upper right')
-    ax[1].set_ylabel('Loss')
-    ax[1].set_ylim([0,2.0])
-    ax[1].set_title('Training and Validation Loss')
-    ax[1].set_xlabel('epoch')
-    plt.savefig(models_path + '/' + 'Train_Val_curves')
+    # ax[1].plot(loss, label='Training Loss')
+    # ax[1].plot(val_loss, label=f'Validation Loss: last epoch {val_loss[-1]:.4f}')
+    # ax[1].legend(loc='upper right')
+    # ax[1].set_ylabel('Loss')
+    # ax[1].set_ylim([0,2.0])
+    # ax[1].set_title('Training and Validation Loss')
+    # ax[1].set_xlabel('epoch')
+    # plt.savefig(models_path + '/' + 'Train_Val_curves')
     
-    with open(models_path + '/' +'statistic.txt', 'w', encoding='utf-8') as file:
-        file.write(f'ACCURACY = {cf.diagonal().mean():.3f} +- {cf.diagonal().std(ddof=1):.3f} \n')
-        file.write(f'top-1 error = {1-m_1.result().numpy()} \n')
-        file.write(f'top-3 error = {1-m_3.result().numpy()} \n')
+    # with open(models_path + '/' +'statistic.txt', 'w', encoding='utf-8') as file:
+    #     file.write(f'ACCURACY = {cf.diagonal().mean():.3f} +- {cf.diagonal().std(ddof=1):.3f} \n')
+    #     file.write(f'top-1 error = {1-m_1.result().numpy()} \n')
+    #     file.write(f'top-3 error = {1-m_3.result().numpy()} \n')
         
