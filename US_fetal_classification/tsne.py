@@ -91,7 +91,7 @@ if __name__ == '__main__':
 	input_shape = INPUT_SHAPE + (3,)
 	
 	if args.extrapolation:
-		base_model = custom_model(INPUT_SHAPE)
+		# base_model = custom_model(INPUT_SHAPE)
 		brain_model = model_brain_plane(models_path + '/'+ 'VGG_16')
 		print(brain_model.summary())
 
@@ -123,20 +123,29 @@ if __name__ == '__main__':
                                                 image_size = INPUT_SHAPE,
                                                 interpolation='bilinear')
 	classes = test_dataset.class_names
-	colors = ['C0', 'C1', 'C2', 'C3', 'C4']
+	colors = ['C0', 'black', 'C2', 'C3', 'C4']
 	labels = [] 
-	for img, label in test_dataset.take(2075):
+	num_images = sum([len(files) for r, d, files in os.walk(tsne_path + '/train')])
+	for img, label in test_dataset.take(num_images):
 		labels.append(label.numpy())
 
-	plt.figure()
+	## PLOTS
+	plt.figure(figsize=(8,6), num=f'TSNE-{args.clas}')
+	plt.title(f't-SNE evlautation for synthetic {args.clas.split("_")[0]} images')
 	for idx, c in enumerate(colors):
 		indices = [i for i, l in enumerate(labels) if idx == l]
 		current_tx = np.take(tx, indices)
 		current_ty = np.take(ty, indices)
 		print(len(indices))
-		if classes[idx] != 'Synthetic': alpha_c = 0.2
-		else : alpha_c = 1 
-		plt.scatter(current_tx, current_ty, c=c, label=classes[idx], alpha=alpha_c)
-
-	plt.legend()
+		if classes[idx] != 'Synthetic': 
+			alpha_idx = 0.3
+			plt.scatter(current_tx, current_ty, c=c, label=classes[idx], alpha=alpha_idx)
+		else : #for synthetic
+			alpha_idx = 1 
+			size_idx = 60
+			plt.scatter(current_tx, current_ty, s=size_idx, c=c, label=classes[idx], alpha=alpha_idx)
+	plt.xlabel(r'$x_1$', fontsize='medium')
+	plt.ylabel(r'$x_2$', fontsize='medium')
+	plt.legend(fontsize='large')
+	plt.savefig(tsne_path + '/' + f'TSNE-{args.clas}.png')
 	plt.show()
