@@ -89,7 +89,7 @@ if __name__ == "__main__":
 	model = tf.keras.models.load_model(models_path + '/VGG_16')
 
 	generated_path = 'GAN/'+ args.attribute + '/' + args.clas + '/synthetic'
-	smart_makedir(generated_path)
+	# smart_makedir(generated_path)
 	
 	for n, (inp, tar) in enumerate(test_dataset.take(len(os.listdir(main_path_test)))):
 		generated_image, real_image = generate_images_test(generator, inp, tar, 
@@ -117,13 +117,16 @@ if __name__ == "__main__":
 			plt.imshow(normalization(display_list[i],0,1))
 			plt.axis('off')
 		plt.savefig('GAN/'+ args.attribute + '/' + args.clas + f'/testing_{n}.png')
-
-		# plt.figure(num=f'syntetic_{n}')
-		# plt.imshow(normalization(generated_image[0],0,1))
-		# plt.axis('off')
-		# plt.savefig(generated_path + '/' + f'syntetic_{n}.png')
-		save_array_as_image(generated_image[0].numpy(), generated_path + '/' + f'synthetic_{n}')
-		plt.show()
+		
+		# save_array_as_image(generated_image[0].numpy(), generated_path + '/' + f'synthetic_{n}')
+		
+		## plot for paper
+		norm_image_paper = [i for i in display_list]
+		norm_image_paper[0] = tf.image.resize(norm_image_paper[0], [224, 224],
+								method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+		norm_image_paper[0] = normalization(norm_image_paper[0], 0., 250.)
+		img_paper = np.vstack(norm_image_paper)
+		save_array_as_image(img_paper, 'GAN/'+ args.attribute + '/' + args.clas + '/' + f'testing_paper_{n}')
 
 
 
